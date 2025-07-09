@@ -1,6 +1,7 @@
 import sqlite3
+import functools
 
-
+# Setup database with users table and sample data
 def init_db():
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
@@ -10,7 +11,7 @@ def init_db():
             name TEXT NOT NULL
         )
     ''')
-    cursor.execute('DELETE FROM users')  # Clear existing data
+    cursor.execute('DELETE FROM users')  # Clear table
     cursor.execute('INSERT INTO users (name) VALUES (?)', ('Alice',))
     cursor.execute('INSERT INTO users (name) VALUES (?)', ('Bob',))
     conn.commit()
@@ -18,25 +19,17 @@ def init_db():
 
 init_db()
 
-import functools
-
 # Decorator to log SQL queries
 def log_queries(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        # Try to find the SQL query passed to the function
         query = kwargs.get('query') if 'query' in kwargs else args[0] if args else None
         if query:
             print(f"[LOG] Executing SQL Query: {query}")
-        else:
-            print("[LOG] No SQL query found.")
-        
-        # Call the original function
         return func(*args, **kwargs)
-    
     return wrapper
 
-# Function that fetches users from the DB
+# Function to fetch users
 @log_queries
 def fetch_all_users(query):
     conn = sqlite3.connect('users.db')
@@ -46,6 +39,6 @@ def fetch_all_users(query):
     conn.close()
     return results
 
-# Run the function to test
+# Call the function
 users = fetch_all_users(query="SELECT * FROM users")
 print(users)
