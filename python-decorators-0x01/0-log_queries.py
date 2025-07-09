@@ -1,4 +1,23 @@
 import sqlite3
+
+
+def init_db():
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL
+        )
+    ''')
+    cursor.execute('DELETE FROM users')  # Clear existing data
+    cursor.execute('INSERT INTO users (name) VALUES (?)', ('Alice',))
+    cursor.execute('INSERT INTO users (name) VALUES (?)', ('Bob',))
+    conn.commit()
+    conn.close()
+
+init_db()
+
 import functools
 
 # Decorator to log SQL queries
