@@ -1,7 +1,7 @@
 import sqlite3
 import functools
 
-# Setup database with users table and sample data
+# Setup the users table and sample data
 def init_db():
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
@@ -11,7 +11,7 @@ def init_db():
             name TEXT NOT NULL
         )
     ''')
-    cursor.execute('DELETE FROM users')  # Clear table
+    cursor.execute('DELETE FROM users')  # Clear table before inserting
     cursor.execute('INSERT INTO users (name) VALUES (?)', ('Alice',))
     cursor.execute('INSERT INTO users (name) VALUES (?)', ('Bob',))
     conn.commit()
@@ -19,7 +19,7 @@ def init_db():
 
 init_db()
 
-# Decorator to log SQL queries
+# Decorator that logs the SQL query
 def log_queries(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
@@ -29,7 +29,7 @@ def log_queries(func):
         return func(*args, **kwargs)
     return wrapper
 
-# Function to fetch users
+# Function to fetch all users
 @log_queries
 def fetch_all_users(query):
     conn = sqlite3.connect('users.db')
@@ -39,6 +39,6 @@ def fetch_all_users(query):
     conn.close()
     return results
 
-# Call the function
+# Run the function and print result
 users = fetch_all_users(query="SELECT * FROM users")
 print(users)
