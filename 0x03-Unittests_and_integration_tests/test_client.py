@@ -86,7 +86,7 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
     def setUpClass(cls):
         """Patch requests.get to mock GitHub API calls"""
         cls.get_patcher = patch('client.requests.get')
-        mock_get = cls.get_patcher.start()
+        cls.mock_get = cls.get_patcher.start()
 
         def side_effect(url, *args, **kwargs):
             if url == cls.org_payload["repos_url"]:
@@ -102,10 +102,11 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
             else:
                 raise ValueError(f"Unexpected URL: {url}")
 
-        mock_get.side_effect = side_effect
+        cls.mock_get.side_effect = side_effect
 
     @classmethod
     def tearDownClass(cls):
+        """Stop patching requests.get"""
         cls.get_patcher.stop()
 
     def test_public_repos(self):
