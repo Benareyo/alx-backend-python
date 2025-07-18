@@ -21,7 +21,10 @@ class GithubOrgClient:
         """Get the org details"""
         url = f"https://api.github.com/orgs/{self.org_name}"
         return get_json(url)
-
+    @staticmethod
+    def has_license(repo, license_key):
+        """Check if repo has a specific license"""
+        return repo.get("license", {}).get("key") == license_key
     @property
     def _public_repos_url(self):
         """Get public repos URL from org data"""
