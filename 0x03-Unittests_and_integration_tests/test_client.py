@@ -24,10 +24,10 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         cls.get_patcher = patch('requests.get')
         cls.mock_get = cls.get_patcher.start()
 
-        org_url = f'https://api.github.com/orgs/{cls.org}'
-        repos_url = cls.org_payload["repos_url"]
-
         def side_effect(url, *args, **kwargs):
+            org_url = f'https://api.github.com/orgs/{cls.org}'
+            repos_url = cls.org_payload["repos_url"]
+
             if url == org_url:
                 response = Mock()
                 response.json.return_value = cls.org_payload
