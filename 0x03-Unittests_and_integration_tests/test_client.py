@@ -25,16 +25,16 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         cls.mock_get = cls.get_patcher.start()
 
         def side_effect(url, *args, **kwargs):
-            org_url = f'https://api.github.com/orgs/{cls.org}'
-            repos_url = cls.org_payload["repos_url"]
+            org_url = f'https://api.github.com/orgs/{cls.org}'  # type: ignore[attr-defined]
+            repos_url = cls.org_payload["repos_url"]  # type: ignore[attr-defined]
 
             if url == org_url:
                 response = Mock()
-                response.json.return_value = cls.org_payload
+                response.json.return_value = cls.org_payload  # type: ignore[attr-defined]
                 return response
             elif url == repos_url:
                 response = Mock()
-                response.json.return_value = cls.repos_payload
+                response.json.return_value = cls.repos_payload  # type: ignore[attr-defined]
                 return response
             return None
 
@@ -47,5 +47,5 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
 
     def test_public_repos(self):
         """Test public_repos method returns expected repo names"""
-        client = GithubOrgClient(self.org)
-        self.assertEqual(client.public_repos(), self.expected_repos)
+        client = GithubOrgClient(self.org)  # type: ignore[attr-defined]
+        self.assertEqual(client.public_repos(), self.expected_repos)  # type: ignore[attr-defined]
