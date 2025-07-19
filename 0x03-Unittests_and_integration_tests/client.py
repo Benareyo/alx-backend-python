@@ -21,7 +21,7 @@ class GithubOrgClient:
     @property
     def _public_repos_url(self) -> str:
         """Get public repos URL from org info"""
-        url = self.org.get("repos_url")
+        url = self.org.get("repos_url")  # Removed explicit Optional[str] here
         if not isinstance(url, str):
             raise ValueError("repos_url not found or not a string in org response")
         return url

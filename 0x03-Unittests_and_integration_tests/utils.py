@@ -1,60 +1,54 @@
 #!/usr/bin/env python3
-"""Utils module"""
+"""Integration test for GithubOrgClient"""
 
-import requests
+import unittest
+from unittest.mock import patch, Mock
+from parameterized import parameterized_class
+from client import GithubOrgClient
+from fixtures import org_payload, repos_payload, expected_repos, apache2_repos
 
+@parameterized_class([
+    {
+        "org_payload": org_payload,
+        "repos_payload": repos_payload,
+        "expected_repos": expected_repos,
+        "org": "test-org"
+    },
+    {
+        "org_payload": org_payload,
+        "repos_payload": apache2_repos,
+        "expected_repos": ["apache2"],
+        "org": "apache2"
+    }
+])
+class TestIntegrationGithubOrgClient(unittest.TestCase):
+    """Integration test class using parameterized_class and fixtures"""
 
-def access_nested_map(nested_map, path):
-    """
-    Access a nested map (dictionary) using a sequence of keys.
+    @classmethod
+    def setUpClass(cls):
+        cls.get_patcher = patch('requests.get')
+        cls.mock_get = cls.get_patcher.start()
 
-    Args:
-        nested_map (dict): The dictionary to access.
-        path (tuple): A tuple of keys to traverse the nested map.
+        def side_effect(url, *args, **kwargs):
+            org_url = f'https://api.github.com/orgs/{cls.org}'
+            repos_url = cls.org_payload["repos_url"]
 
-    Returns:
-        The value found by traversing the nested map using the keys in path.
+            if url == org_url:
+                response = Mock()
+                response.json.return_value = cls.org_payload
+                return response
+            elif url == repos_url:
+                response = Mock()
+                response.json.return_value = cls.repos_payload
+                return response
+            return None
 
-    Raises:
-        KeyError: If a key in the path is not found or
-                  if the current value is not a dictionary when expecting one.
-    """
-    for key in path:
-        if not isinstance(nested_map, dict):
-            raise KeyError(key)
-        nested_map = nested_map[key]
-    return nested_map
+        cls.mock_get.side_effect = side_effect
 
+    @classmethod
+    def tearDownClass(cls):
+        cls.get_patcher.stop()
 
-def get_json(url):
-    """
-    Make an HTTP GET request to the specified URL and return the JSON response.
-
-    Args:
-        url (str): URL to make the GET request to.
-
-    Returns:
-        dict: JSON response from the URL.
-    """
-    response = requests.get(url)
-    return response.json()
-
-
-def memoize(method):
-    """
-    Memoization decorator to cache a method's result.
-
-    Args:
-        method (function): The instance method to memoize.
-
-    Returns:
-        property: A property that caches the result of the method call.
-    """
-    attr_name = f"_{method.__name__}"
-
-    def wrapper(self):
-        if not hasattr(self, attr_name):
-            setattr(self, attr_name, method(self))
-        return getattr(self, attr_name)
-
-    return property(wrapper)
+    def test_public_repos(self):
+        client = GithubOrgClient(self.org)
+        self.assertEqual(client.public_repos(), self.expected_repos)
