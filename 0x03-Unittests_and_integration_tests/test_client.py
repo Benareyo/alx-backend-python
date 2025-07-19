@@ -24,13 +24,15 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         cls.get_patcher = patch('requests.get')
         cls.mock_get = cls.get_patcher.start()
 
-        # Fake response logic
+        org_url = f'https://api.github.com/orgs/{cls.org}'
+        repos_url = cls.org_payload["repos_url"]
+
         def side_effect(url, *args, **kwargs):
-            if url == f'https://api.github.com/orgs/{cls.org}':
+            if url == org_url:
                 response = Mock()
                 response.json.return_value = cls.org_payload
                 return response
-            elif url == cls.org_payload["repos_url"]:
+            elif url == repos_url:
                 response = Mock()
                 response.json.return_value = cls.repos_payload
                 return response
