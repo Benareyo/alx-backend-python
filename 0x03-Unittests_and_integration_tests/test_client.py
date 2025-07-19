@@ -5,11 +5,11 @@ import unittest
 from unittest.mock import patch
 from parameterized import parameterized_class
 from client import GithubOrgClient
-import fixtures
+import fixtures  # your fixtures.py file with org_payload, repos_payload, etc.
 
 
 class MockResponse:
-    """Mock for requests.Response object."""
+    """Mock requests.Response for json() and raise_for_status()"""
 
     def __init__(self, json_data):
         self._json = json_data
@@ -18,7 +18,7 @@ class MockResponse:
         return self._json
 
     def raise_for_status(self):
-        pass  # simulate always successful response
+        pass  # Assume always OK
 
 
 @parameterized_class([
@@ -37,6 +37,7 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        # Patch requests.get before any tests run
         cls.get_patcher = patch("requests.get")
         cls.mock_get = cls.get_patcher.start()
 
@@ -51,6 +52,7 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        # Stop patching after all tests
         cls.get_patcher.stop()
 
     def test_public_repos(self):
@@ -59,12 +61,11 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
 
     def test_public_repos_with_license(self):
         client = GithubOrgClient("google")
-        # filter repos with license key "apache-2.0"
-        repos_with_license = [
-            repo["name"] for repo in self.repos_payload
-            if repo.get("license") and repo["license"].get("key") == "apache-2.0"
-        ]
-        self.assertEqual(repos_with_license, self.apache2_repos)
+        # Filtering repos with apache-2.0 license manually here:
+        filtered = [repo for repo in self.repos_payload
+                    if GithubOrgClient.has_license(repo, "apache-2.0")]
+        filtered_names = [repo["name"] for repo in filtered]
+        self.assertEqual(filtered_names, self.apache2_repos)
 
 
 if __name__ == "__main__":
