@@ -14,19 +14,18 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
 from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import home
-from chats.views import ConversationViewSet, MessageViewSet
+from rest_framework_nested import routers
+from .views import ConversationViewSet, MessageViewSet
 
-router = DefaultRouter()
+router = routers.DefaultRouter()
 router.register(r'conversations', ConversationViewSet, basename='conversation')
-router.register(r'messages', MessageViewSet, basename='message')
+
+conversations_router = routers.NestedDefaultRouter(router, r'conversations', lookup='conversation')
+conversations_router.register(r'messages', MessageViewSet, basename='conversation-messages')
 
 urlpatterns = [
-    path('', home),
-    path('admin/', admin.site.urls),
-    path('api/', include(router.urls)),
-    path('api-auth/', include('rest_framework.urls')),  # <--- ADD THIS LINE
+    path('', include(router.urls)),
+    path('', include(conversations_router.urls)),
 ]
+
