@@ -42,3 +42,5 @@ class CustomValidatorSerializer(serializers.Serializer):
         if "bad" in value.lower():
             raise serializers.ValidationError("Invalid content detected.")
         return value
+
+
