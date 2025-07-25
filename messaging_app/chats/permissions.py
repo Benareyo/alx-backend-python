@@ -10,13 +10,15 @@ class IsAuthenticatedUser(permissions.BasePermission):
         return request.user and request.user.is_authenticated
 
 
-class IsParticipantOrReadOnly(permissions.BasePermission):
+class IsParticipantOfConversation(permissions.BasePermission):
     """
-    Custom permission to only allow participants of a conversation
-    to send, update or delete messages.
+    Custom permission: Only participants of a conversation can view, update, delete, or send messages.
     """
+
     def has_object_permission(self, request, view, obj):
-        if request.method in ['PUT', 'PATCH', 'DELETE']:
-            if request.user != obj.sender and request.user != obj.receiver:
-                raise PermissionDenied(detail="You are not allowed to modify this message.", code=HTTP_403_FORBIDDEN)
-        return request.user == obj.sender or request.user == obj.receiver
+        if request.user == obj.sender or request.user == obj.receiver:
+            return True
+        raise PermissionDenied(
+            detail="You are not a participant in this conversation.",
+            code=HTTP_403_FORBIDDEN
+        )
