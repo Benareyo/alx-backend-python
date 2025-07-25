@@ -2,6 +2,9 @@ from rest_framework import permissions
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.status import HTTP_403_FORBIDDEN
 
+SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS']
+EDIT_METHODS = ['PUT', 'PATCH', 'DELETE']
+
 class IsAuthenticatedUser(permissions.BasePermission):
     """
     Allows access only to authenticated users.
@@ -12,13 +15,21 @@ class IsAuthenticatedUser(permissions.BasePermission):
 
 class IsParticipantOfConversation(permissions.BasePermission):
     """
-    Custom permission: Only participants of a conversation can view, update, delete, or send messages.
+    Allows only participants of the conversation to send, view, update, or delete messages.
     """
 
     def has_object_permission(self, request, view, obj):
-        if request.user == obj.sender or request.user == obj.receiver:
+        # Allow read-only access
+        if request.method in SAFE_METHODS:
             return True
-        raise PermissionDenied(
-            detail="You are not a participant in this conversation.",
-            code=HTTP_403_FORBIDDEN
-        )
+
+        # Allow edit methods only if the user is the sender or receiver
+        if request.method in EDIT_METHODS or request.method == "POST":
+            if request.user != obj.sender and request.user != obj.receiver:
+                raise PermissionDenied(
+                    detail="You are not a participant in this conversation.",
+                    code=HTTP_403_FORBIDDEN
+                )
+
+        # General object-level permission check
+        return request.user == obj.sender or request.user == obj.receiver
