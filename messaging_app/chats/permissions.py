@@ -1,5 +1,22 @@
 from rest_framework import permissions
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.status import HTTP_403_FORBIDDEN
 
-class IsOwner(permissions.BasePermission):
+class IsAuthenticatedUser(permissions.BasePermission):
+    """
+    Allows access only to authenticated users.
+    """
+    def has_permission(self, request, view):
+        return request.user and request.user.is_authenticated
+
+
+class IsParticipantOrReadOnly(permissions.BasePermission):
+    """
+    Custom permission to only allow participants of a conversation
+    to send, update or delete messages.
+    """
     def has_object_permission(self, request, view, obj):
-        return obj.user == request.user
+        if request.method in ['PUT', 'PATCH', 'DELETE']:
+            if request.user != obj.sender and request.user != obj.receiver:
+                raise PermissionDenied(detail="You are not allowed to modify this message.", code=HTTP_403_FORBIDDEN)
+        return request.user == obj.sender or request.user == obj.receiver
