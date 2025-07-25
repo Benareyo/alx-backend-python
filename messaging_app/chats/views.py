@@ -3,6 +3,11 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from .models import Conversation, Message
 from .serializers import ConversationSerializer, MessageSerializer
+from .permissions import IsOwner
+
+class MessageViewSet(viewsets.ModelViewSet):
+    ...
+    permission_classes = [IsAuthenticated, IsOwner]
 
 class ConversationViewSet(viewsets.ModelViewSet):
     """

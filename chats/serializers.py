@@ -34,7 +34,7 @@ class ConversationSerializer(serializers.ModelSerializer):
         return MessageSerializer(obj.messages.all(), many=True).data
 
 
-# Bonus (not strictly required, but to show usage of ValidationError):
+
 class CustomValidatorSerializer(serializers.Serializer):
     sample_field = serializers.CharField()
 
