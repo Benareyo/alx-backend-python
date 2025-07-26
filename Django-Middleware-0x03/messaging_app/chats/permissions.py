@@ -1,5 +1,5 @@
 from rest_framework.permissions import BasePermission, SAFE_METHODS
-from .models import Conversation, message
+from .models import Conversation, Message
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.status import HTTP_403_FORBIDDEN
 
