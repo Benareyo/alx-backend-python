@@ -34,11 +34,7 @@ class ConversationSerializer(serializers.ModelSerializer):
         return MessageSerializer(obj.messages.all(), many=True).data
 
 
-<<<<<<< HEAD
 # Bonus (not strictly required, but to show usage of ValidationError):
-=======
-
->>>>>>> 304ced478da411f5219fe2b9bd843517e7e0dce4
 class CustomValidatorSerializer(serializers.Serializer):
     sample_field = serializers.CharField()
 
@@ -46,8 +42,3 @@ class CustomValidatorSerializer(serializers.Serializer):
         if "bad" in value.lower():
             raise serializers.ValidationError("Invalid content detected.")
         return value
-<<<<<<< HEAD
-=======
-
-
->>>>>>> 304ced478da411f5219fe2b9bd843517e7e0dce4
