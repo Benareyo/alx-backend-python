@@ -1,53 +1,49 @@
 from rest_framework import viewsets, status, filters
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
-from rest_framework.exceptions import PermissionDenied
-from rest_framework.status import HTTP_403_FORBIDDEN
-
+from django.contrib.auth.models import User
 from .models import Conversation, Message
 from .serializers import ConversationSerializer, MessageSerializer
-from .permissions import IsAuthenticatedUser, IsParticipantOrReadOnly
+
 
 class ConversationViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet for listing, creating, retrieving, updating, and deleting conversations.
-    """
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
     filter_backends = [filters.SearchFilter]
-    search_fields = ['title']
+    search_fields = ['participants__username']
+
+    def create(self, request, *args, **kwargs):
+        participants = request.data.get("participants")
+        if not participants or len(participants) < 2:
+            return Response({"error": "At least two participants are required."},
+                            status=status.HTTP_400_BAD_REQUEST)
+        conversation = Conversation.objects.create()
+        conversation.participants.set(participants)
+        serializer = self.get_serializer(conversation)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class MessageViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet for listing, creating, retrieving, updating, and deleting messages.
-    """
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
-    permission_classes = [IsAuthenticatedUser, IsParticipantOrReadOnly]
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['sender__username', 'conversation__id']
 
-    def get_queryset(self):
-        """
-        Restrict messages to a given conversation and check if user is a participant.
-        """
-        conversation_pk = self.kwargs.get('conversation_pk')
-        if conversation_pk:
-            # Filter messages for the conversation
-            messages = Message.objects.filter(conversation_id=conversation_pk)
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        conversation_id = data.get("conversation")
+        sender = request.user
+        content = data.get("content")
 
-            # Check if the user is a participant in the conversation
-            try:
-                conversation = Conversation.objects.get(pk=conversation_pk)
-            except Conversation.DoesNotExist:
-                raise PermissionDenied(detail="Conversation not found.", code=HTTP_403_FORBIDDEN)
+        if not (conversation_id and content):
+            return Response({"error": "Conversation and content are required."},
+                            status=status.HTTP_400_BAD_REQUEST)
 
-            if self.request.user not in [conversation.sender, conversation.receiver]:
-                raise PermissionDenied(
-                    detail="You are not a participant in this conversation.",
-                    code=HTTP_403_FORBIDDEN
-                )
+        try:
+            conversation = Conversation.objects.get(pk=conversation_id)
+        except Conversation.DoesNotExist:
+            return Response({"error": "Conversation not found."}, status=status.HTTP_404_NOT_FOUND)
 
-            return messages
-
-        return self.queryset.none()  # Return no messages if no conversation_pk provided
+        message = Message.objects.create(conversation=conversation, sender=sender, content=content)
+        serializer = self.get_serializer(message)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

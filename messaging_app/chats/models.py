@@ -1,6 +1,10 @@
 import uuid
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 class User(AbstractUser):
     user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -18,6 +22,22 @@ class User(AbstractUser):
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='guest', null=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    groups = models.ManyToManyField(
+        Group,
+        related_name='chats_user_set',  # Unique related_name to avoid clash
+        blank=True,
+        help_text='The groups this user belongs to.',
+        verbose_name='groups',
+    )
+
+    user_permissions = models.ManyToManyField(
+        Permission,
+        related_name='chats_user_set',  # Unique related_name to avoid clash
+        blank=True,
+        help_text='Specific permissions for this user.',
+        verbose_name='user permissions',
+    )
+
     REQUIRED_FIELDS = ['email', 'first_name', 'last_name']
 
     def __str__(self):
@@ -34,8 +54,14 @@ class Conversation(models.Model):
 
 
 class Message(models.Model):
-    message_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
+    message_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    sender = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='sent_messages',
+        null=False,
+        default=1  
+    )
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
     message_body = models.TextField(null=False)
     sent_at = models.DateTimeField(auto_now_add=True)
