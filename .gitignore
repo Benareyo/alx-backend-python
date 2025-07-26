@@ -1,0 +1,3 @@
+echo "*.pyc" >> .gitignore
+echo "pycache/" >> .gitignore
+echo "db.sqlite3" >> .gitignore
