@@ -1,5 +1,5 @@
-from rest_framework.permissions import BasePermission
-from .models import Conversation
+from rest_framework.permissions import BasePermission, SAFE_METHODS
+from .models import Conversation, message
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.status import HTTP_403_FORBIDDEN
 
@@ -18,9 +18,16 @@ class IsParticipantOfConversation(BasePermission):
     """
     Allows only participants of the conversation to send, view, update, or delete messages.
     """
+    def has_permission(self, request, view):
+        return request.user and request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
         # Allow read-only access
+        conversation = getattr(obj, 'conversation', None)
+        if conversation:
+            return request.user == conversation.sender or request.user == conversation.receiver
+        return False
+    
         if request.method in SAFE_METHODS:
             return True
 

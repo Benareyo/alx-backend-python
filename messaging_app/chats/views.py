@@ -14,6 +14,8 @@ from .filters import MessageFilter  # Make sure you have this file
 from .pagination import MessagePagination  # If you created custom pagination
 from rest_framework import generics
 
+from rest_framework.permissions import IsAuthenticated
+
 
 from rest_framework import viewsets
 from .models import Message
@@ -27,7 +29,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
     serializer_class = ConversationSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['title']
-
+    permission_classes = [IsAuthenticatedUser]
 
 class MessageViewSet(viewsets.ModelViewSet):
     """
@@ -36,7 +38,7 @@ class MessageViewSet(viewsets.ModelViewSet):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
     permission_classes = [IsAuthenticatedUser, IsParticipantOfConversation]
-    permission_classes = [IsParticipant]
+    #permission_classes = [IsParticipant]
     filter_backends = [DjangoFilterBackend]
     filterset_class = MessageFilter
     pagination_class = MessagePagination
