@@ -7,6 +7,7 @@ from rest_framework_simplejwt.views import (
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('chats/', include('chats.urls')),
     path('api/', include('chats.urls')),  # Routes to your chats app
     path('api-auth/', include('rest_framework.urls')),  # For browsable API login
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),  # Login token
