@@ -10,8 +10,8 @@ from .serializers import ConversationSerializer, MessageSerializer
 from .permissions import IsAuthenticatedUser, IsParticipantOfConversation
 
 from django_filters.rest_framework import DjangoFilterBackend
-from .filters import MessageFilter  # Make sure you have this file
-from .pagination import MessagePagination  # If you created custom pagination
+from .filters import MessageFilter  
+from .pagination import MessagePagination  
 from rest_framework import generics
 
 from rest_framework.permissions import IsAuthenticated
