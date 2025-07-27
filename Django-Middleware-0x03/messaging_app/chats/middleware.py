@@ -43,3 +43,14 @@ class RequestLoggingMiddleware:
 
         response = self.get_response(request)
         return response
+class RolepermissionMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # Assuming the user object has a 'role' attribute
+        user = getattr(request, 'user', None)
+        if user and user.is_authenticated:
+            if user.role not in ['admin', 'moderator']:
+                return HttpResponseForbidden("403 Forbidden: You don't have permission to access this resource.")
+        return self.get_response(request)
