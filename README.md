@@ -18,7 +18,7 @@ Custom Python decorators used to enhance database operations:
 * ✅ `@retry_on_failure`: Retries transient DB errors.
 * ✅ `@cache_query`: Avoids redundant DB calls by caching query results.
 
-📁 Tasks:
+📁 Tasks: 
 
 | Task | Description            | File                      |
 | ---- | ---------------------- | ------------------------- |
