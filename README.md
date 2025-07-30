@@ -1,6 +1,6 @@
 # ALX Backend Python 
 
-Welcome to the **ALX Backend Python** repository! 🚀
+Welcome to the **ALX Backend Python** repository! 
 
 This repository contains solutions for milestone backend Python projects in the ALX Software Engineering program, with a focus on decorators, generators, context managers, and async operations using SQLite.
 
