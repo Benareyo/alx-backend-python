@@ -1,4 +1,4 @@
-from rest_framework import viewsets, status, filters, generics
+from rest_framework import viewsets, status, filters
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
@@ -12,12 +12,15 @@ from .permissions import IsAuthenticatedUser, IsParticipantOfConversation
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import MessageFilter  
 from .pagination import MessagePagination  
+from rest_framework import generics
 
-# Import cache_page decorator
-from django.views.decorators.cache import cache_page
-from django.utils.decorators import method_decorator
+from rest_framework.permissions import IsAuthenticated
 
 
+from rest_framework import viewsets
+from .models import Message
+from .serializers import MessageSerializer
+from .permissions import IsParticipant
 class ConversationViewSet(viewsets.ModelViewSet):
     """
     ViewSet for listing, creating, retrieving, updating, and deleting conversations.
@@ -28,7 +31,6 @@ class ConversationViewSet(viewsets.ModelViewSet):
     search_fields = ['title']
     permission_classes = [IsAuthenticatedUser]
 
-
 class MessageViewSet(viewsets.ModelViewSet):
     """
     ViewSet for listing, creating, retrieving, updating, and deleting messages.
@@ -36,6 +38,7 @@ class MessageViewSet(viewsets.ModelViewSet):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
     permission_classes = [IsAuthenticatedUser, IsParticipantOfConversation]
+    #permission_classes = [IsParticipant]
     filter_backends = [DjangoFilterBackend]
     filterset_class = MessageFilter
     pagination_class = MessagePagination
@@ -64,9 +67,6 @@ class MessageViewSet(viewsets.ModelViewSet):
             return messages
 
         return self.queryset.none()  # Return no messages if no conversation_pk provided
-
-
-@method_decorator(cache_page(60), name='dispatch')  # Cache this ListAPIView for 60 seconds
 class MessageListAPIView(generics.ListAPIView):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer

@@ -4,12 +4,12 @@ from datetime import timedelta
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-k84*!m2b9z(%k(787#o67=ijk-aey+-8byu32*2ymp#0h2m9i#'
-
 DEBUG = True
-
 ALLOWED_HOSTS = []
 
+# Application definition
 INSTALLED_APPS = [
+    # Django core apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -22,12 +22,11 @@ INSTALLED_APPS = [
     'django_filters',
     'rest_framework_simplejwt',
 
-   
+    # Your apps
     'messaging.apps.MessagingConfig',
-    'Django-Chat.apps.DjangoChatConfig',
+    'django_chat.apps.DjangoChatConfig',  # Changed from Django-Chat to django_chat
     'chats',
 ]
-
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -37,12 +36,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'chats.middleware.RequestLoggingMiddleware',
 
+    # Custom middleware
+    'chats.middleware.RequestLoggingMiddleware',
 ]
 
-
-ROOT_URLCONF = 'messaging_app.urls'  
+ROOT_URLCONF = 'messaging_app.urls'
 
 TEMPLATES = [
     {
@@ -61,6 +60,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'messaging_app.wsgi.application'
 
+# Database
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -68,6 +68,7 @@ DATABASES = {
     }
 }
 
+# Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -75,48 +76,40 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
+# Internationalization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
+# Static files
 STATIC_URL = 'static/'
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# REST Framework configuration
+# Custom User model
+AUTH_USER_MODEL = 'chats.User'
+
+# Django REST Framework (DRF) config
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
-       'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
-    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-
     'PAGE_SIZE': 20,
 }
 
-
-DEFAULT_PERMISSION_CLASSES = [
-    'rest_framework.permissions.IsAuthenticated',
-]
-
-DEFAULT_AUTHENTICATION_CLASSES = [
-    'rest_framework.authentication.SessionAuthentication',
-    'rest_framework.authentication.BasicAuthentication',
-]
-
+# JWT Config
 SIMPLE_JWT = {
-    'USER_ID_FIELD': 'user_id',       # your actual PK field
-    'USER_ID_CLAIM': 'user_id',       # this is what will show in the JWT payload
-    # Optionally customize lifetime, etc.
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'USER_ID_FIELD': 'id',  # Default primary key field; adjust if needed
+    'USER_ID_CLAIM': 'user_id',
 }
-
-
-AUTH_USER_MODEL = 'chats.User'
