@@ -113,3 +113,9 @@ SIMPLE_JWT = {
     'USER_ID_FIELD': 'id',  # Default primary key field; adjust if needed
     'USER_ID_CLAIM': 'user_id',
 }
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}

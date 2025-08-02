@@ -3,6 +3,22 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from messaging.models import Message
+from django.views.decorators.cache import cache_page
+from django.shortcuts import render, get_object_or_404
+from django.views.decorators.cache import cache_page
+from .models import Message
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+
+@cache_page(60)  # <-- 60 seconds cache timeout
+@login_required
+def conversation_messages(request, conversation_id):
+    messages = Message.objects.filter(conversation_id=conversation_id).select_related('sender', 'receiver').only('id', 'sender', 'receiver', 'content', 'timestamp')
+    return render(request, 'messaging/conversation_messages.html', {'messages': messages})
+@login_required
+def conversation_messages(request, conversation_id):
+    messages = Message.objects.filter(conversation_id=conversation_id).select_related('sender', 'receiver').only('id', 'sender', 'receiver', 'content', 'timestamp')
+    return render(request, 'messaging/conversation_messages.html', {'messages': messages})
 
 User = get_user_model()
 
