@@ -3,6 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from messaging.models import Message
+from django.shortcuts import render
+
 
 User = get_user_model()
 
@@ -45,6 +47,13 @@ def get_unread_messages(request):
     """
     unread_messages = Message.unread.for_user(request.user).select_related('sender').order_by('-timestamp')
 
+    context = {
+        'unread_messages': unread_messages
+    }
+    return render(request, 'messaging/unread_messages.html', context)
+def unread_messages_view(request):
+    unread_messages = Message.unread.unread_for_user(request.user).select_related('sender').order_by('-timestamp')
+    
     context = {
         'unread_messages': unread_messages
     }
