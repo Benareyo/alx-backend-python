@@ -17,6 +17,13 @@ class Message(models.Model):
     )
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
+    
+    parent_message = models.ForeignKey(
+    'self', null=True, blank=True,
+    on_delete=models.CASCADE,
+    related_name='replies'
+)
+
 
     # Track if message was edited
     edited = models.BooleanField(default=False)
