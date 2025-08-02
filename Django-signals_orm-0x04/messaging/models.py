@@ -1,7 +1,10 @@
-# messaging/models.py
-
 from django.db import models
 from django.conf import settings
+from .managers import UnreadMessagesManager
+
+class UnreadMessagesManager(models.Manager):
+    def for_user(self, user):
+        return self.filter(receiver=user, read=False).only('id', 'sender', 'content', 'timestamp')
 
 
 class Message(models.Model):
@@ -17,13 +20,12 @@ class Message(models.Model):
     )
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
-    
-    parent_message = models.ForeignKey(
-    'self', null=True, blank=True,
-    on_delete=models.CASCADE,
-    related_name='replies'
-)
 
+    # Track if message was read or not
+    read = models.BooleanField(default=False)
+
+    objects = models.Manager()  # Default manager
+    unread = UnreadMessagesManager()  # Custom manager for unread messages
 
     # Track if message was edited
     edited = models.BooleanField(default=False)
@@ -35,9 +37,19 @@ class Message(models.Model):
         on_delete=models.SET_NULL
     )
 
+    # For threaded replies
+    parent_message = models.ForeignKey(
+        'self', null=True, blank=True,
+        on_delete=models.CASCADE,
+        related_name='replies'
+    )
+
+    # Add the custom manager
+    objects = models.Manager()  # Default manager
+    unread = UnreadMessagesManager()  # Custom unread messages manager
+
     def __str__(self):
         return f"From {self.sender.username} to {self.receiver.username}"
-
 
 class MessageHistory(models.Model):
     message = models.ForeignKey(

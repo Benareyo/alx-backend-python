@@ -35,3 +35,17 @@ def get_user_messages(request):
         'messages': messages_qs
     }
     return render(request, 'messaging/user_messages.html', context)
+
+
+@login_required
+def get_unread_messages(request):
+    """
+    View to fetch unread messages for the logged-in user,
+    optimized with the custom manager and only necessary fields.
+    """
+    unread_messages = Message.unread.for_user(request.user).select_related('sender').order_by('-timestamp')
+
+    context = {
+        'unread_messages': unread_messages
+    }
+    return render(request, 'messaging/unread_messages.html', context)
