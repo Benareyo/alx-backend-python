@@ -12,8 +12,7 @@ def delete_user(request):
     View to allow a logged-in user to delete their account.
     """
     if request.method == 'POST':
-        user = request.user
-        user.delete()
+        request.user.delete()
         messages.success(request, "Your account has been deleted successfully.")
         return redirect('home')  # Change 'home' to your actual landing page name
     return render(request, 'messaging/delete_user_confirm.html')
@@ -26,9 +25,7 @@ def get_user_messages(request):
     including related receiver, editor, parent message,
     and prefetch replies for optimized DB queries.
     """
-    user = request.user
-
-    messages_qs = Message.objects.filter(sender=user).select_related(
+    messages_qs = Message.objects.filter(sender=request.user).select_related(
         'receiver', 'edited_by', 'parent_message'
     ).prefetch_related(
         'replies'
