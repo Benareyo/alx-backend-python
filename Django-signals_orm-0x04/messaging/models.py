@@ -20,6 +20,13 @@ class Message(models.Model):
 
     # Track if message was edited
     edited = models.BooleanField(default=False)
+    edited_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        related_name='edited_messages',
+        on_delete=models.SET_NULL
+    )
 
     def __str__(self):
         return f"From {self.sender.username} to {self.receiver.username}"
