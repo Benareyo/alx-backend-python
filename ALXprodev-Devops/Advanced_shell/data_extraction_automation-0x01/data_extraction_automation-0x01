@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Read from data.json and extract values using jq
+name=$(jq -r '.name' data.json)
+type=$(jq -r '.types[0].type.name' data.json)
+weight=$(jq -r '.weight' data.json)
+height=$(jq -r '.height' data.json)
+
+# Convert to human-readable units
+weight_kg=$(awk "BEGIN { print $weight / 10 }")
+height_m=$(awk "BEGIN { print $height / 10 }")
+
+# Print in the required format
+echo "$name is of type $type, weighs ${weight_kg}kg, and is ${height_m}m tall."
