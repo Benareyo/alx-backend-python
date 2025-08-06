@@ -1,14 +1,17 @@
 #!/bin/bash
 
-# Read from data.json and extract values using jq
-name=$(jq -r '.name' data.json)
-type=$(jq -r '.types[0].type.name' data.json)
-weight=$(jq -r '.weight' data.json)
+# Ensure the JSON file exists
+if [ ! -f data.json ]; then
+    echo "Error: data.json not found!"
+    exit 1
+fi
+
+# Extract data
+name=$(jq -r '.name' data.json | awk '{print toupper(substr($0,1,1)) tolower(substr($0,2))}')
 height=$(jq -r '.height' data.json)
+weight=$(jq -r '.weight' data.json)
+type=$(jq -r '.types[0].type.name' data.json | awk '{print toupper(substr($0,1,1)) tolower(substr($0,2))}')
 
-# Convert to human-readable units
-weight_kg=$(awk "BEGIN { print $weight / 10 }")
-height_m=$(awk "BEGIN { print $height / 10 }")
+# Print formatted output
+echo "$name is of type $type, weighs ${weight}kg, and is ${height}m tall."
 
-# Print in the required format
-echo "$name is of type $type, weighs ${weight_kg}kg, and is ${height_m}m tall."
