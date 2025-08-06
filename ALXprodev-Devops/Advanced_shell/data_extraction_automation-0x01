@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Fetch Pikachu data from the Pokémon API
+curl -s https://pokeapi.co/api/v2/pokemon/pikachu > data.json
+
+# Extract key details using jq
+NAME=$(jq -r '.name' data.json)
+TYPE=$(jq -r '.types[0].type.name' data.json)
+WEIGHT=$(jq -r '.weight' data.json)
+HEIGHT=$(jq -r '.height' data.json)
+
+# Display it in a user-friendly format
+echo "$NAME is of type $TYPE, weighs ${WEIGHT}kg, and is ${HEIGHT}m tall."
