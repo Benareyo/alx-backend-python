@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser, PermissionsMixin
+from django.contrib.auth.models import AbstractUser
 import uuid 
 from django.contrib.auth.base_user import BaseUserManager
 from django.utils.translation import gettext_lazy  as _
@@ -76,15 +76,7 @@ class Message(models.Model):
     message_id=models.UUIDField(primary_key=True, default=uuid.uuid4,editable=False,
                             db_index=True)
     sender=models.ForeignKey(User,on_delete=models.CASCADE)
-    conversation = models.ForeignKey(
-    Conversation,
-    on_delete=models.CASCADE,
-    related_name='messages',
-    null=True,       # Allow null temporarily
-    blank=True       # Allow blank in forms/admin (optional)
-)
-
-    # conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
+    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
     message_body=models.TextField(null=False)
     sent_at=models.DateTimeField(auto_now_add=True)
        

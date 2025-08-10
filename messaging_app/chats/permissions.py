@@ -1,52 +1,31 @@
-from rest_framework.permissions import BasePermission, SAFE_METHODS
-from .models import Conversation, Message
-from rest_framework.exceptions import PermissionDenied
-from rest_framework.status import HTTP_403_FORBIDDEN
+from rest_framework import permissions
+from rest_framework.permissions import SAFE_METHODS
 
-SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS']
-EDIT_METHODS = ['PUT', 'PATCH', 'DELETE']
+class IsParticipantOfConversation(permissions.BasePermission):
+    """
+    Allows only authenticated users who are participants in the conversation
+    to send, view, update, or delete messages.
+    """
 
-class IsAuthenticatedUser(BasePermission):
-    """
-    Allows access only to authenticated users.
-    """
     def has_permission(self, request, view):
-        return request.user and request.user.is_authenticated
-
-
-class IsParticipantOfConversation(BasePermission):
-    """
-    Allows only participants of the conversation to send, view, update, or delete messages.
-    """
-    def has_permission(self, request, view):
+        # All users must be authenticated
         return request.user and request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
-        # Allow read-only access
-        conversation = getattr(obj, 'conversation', None)
-        if conversation:
-            return request.user == conversation.sender or request.user == conversation.receiver
+        """
+        Handles object-level permission:
+        - For Conversations: check if user is a participant
+        - For Messages: check if user is in the conversation participants
+        - For update/delete (PUT, PATCH, DELETE): enforce participant check too
+        """
+
+        if request.method in SAFE_METHODS or request.method in ["PUT", "PATCH", "DELETE", "POST"]:
+            # If the object is a Conversation
+            if hasattr(obj, 'participants'):
+                return request.user in obj.participants.all()
+
+            # If the object is a Message
+            if hasattr(obj, 'conversation'):
+                return request.user in obj.conversation.participants.all()
+
         return False
-    
-        if request.method in SAFE_METHODS:
-            return True
-
-        # Allow edit methods only if the user is the sender or receiver
-        if request.method in EDIT_METHODS or request.method == "POST":
-            if request.user != obj.sender and request.user != obj.receiver:
-                raise PermissionDenied(
-                    detail="You are not a participant in this conversation.",
-                    code=HTTP_403_FORBIDDEN
-                )
-
-        # General object-level permission check
-        return request.user == obj.sender or request.user == obj.receiver
-class IsParticipant(BasePermission):
-    """
-    Custom permission to only allow participants of a conversation
-    to view, send, update, or delete messages.
-    """
-
-    def has_object_permission(self, request, view, obj):
-        # Check if the request.user is in the conversation's participants
-        return request.user in obj.conversation.participants.all()

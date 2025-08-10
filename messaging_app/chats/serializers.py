@@ -1,44 +1,30 @@
 from rest_framework import serializers
-from django.contrib.auth.models import User
-from .models import Conversation, Message
-
+from .models import User,Conversation,Message
 
 class UserSerializer(serializers.ModelSerializer):
-    username = serializers.CharField()  # Explicitly included for checker
-    email = serializers.CharField()
-
+    password = serializers.CharField(write_only=True, required=True)
     class Meta:
-        model = User
-        fields = ['id', 'username', 'email']
-
-
+        model=User
+        fields=['user_id', 'first_name', 'last_name', 'email', 'password','phone_number', 'role', 'created_at']
+        read_only_fields = ['user_id', 'created_at']
 class MessageSerializer(serializers.ModelSerializer):
-    sender = UserSerializer(read_only=True)
-    content = serializers.CharField()
-    timestamp = serializers.DateTimeField()
-
+    sender=UserSerializer(read_only=True)
     class Meta:
-        model = Message
-        fields = ['id', 'conversation', 'sender', 'content', 'timestamp']
-
-
+        model=Message
+        fields=['message_id', 'sender', 'conversation', 'message_body', 'sent_at']
+        read_only_fields=['message_id', 'sent_at', 'sender']
+    
+    def validate_message_body(self, value):
+        if not value.strip():
+            raise serializers.ValidationError("Message body cannot be empty or whitespace only.")
+        return value
 class ConversationSerializer(serializers.ModelSerializer):
     participants = UserSerializer(many=True, read_only=True)
-    messages = serializers.SerializerMethodField()
-
+    messages = MessageSerializer(many=True, read_only=True)
+    message_count = serializers.SerializerMethodField()
     class Meta:
-        model = Conversation
-        fields = ['id', 'participants', 'messages']
-
-    def get_messages(self, obj):
-        return MessageSerializer(obj.messages.all(), many=True).data
-
-
-# Bonus (not strictly required, but to show usage of ValidationError):
-class CustomValidatorSerializer(serializers.Serializer):
-    sample_field = serializers.CharField()
-
-    def validate_sample_field(self, value):
-        if "bad" in value.lower():
-            raise serializers.ValidationError("Invalid content detected.")
-        return value
+        model=Conversation
+        fields=['conversation_id', 'participants', 'created_at', 'messages','message_count']
+        read_only_fields=['conversation_id', 'created_at']
+    def get_message_count(self, obj):
+        return obj.messages.count()
