@@ -1,0 +1,32 @@
+#!/bin/bash
+# -------------------------------
+# Script: kubctl-0x02
+# Purpose: Blue-Green Deployment, check logs
+# -------------------------------
+
+set -e
+
+NAMESPACE=default
+
+# Apply Blue (current) deployment
+echo "Applying Blue deployment..."
+kubectl apply -f messaging_app/blue_deployment.yaml -n $NAMESPACE
+
+# Apply Green (new) deployment
+echo "Applying Green deployment..."
+kubectl apply -f messaging_app/green_deployment.yaml -n $NAMESPACE
+
+# Apply Service
+echo "Applying Service..."
+kubectl apply -f kubeservice.yaml -n $NAMESPACE
+
+# Check logs of new green pods
+echo "Checking logs of green deployment pods..."
+GREEN_PODS=$(kubectl get pods -l app=messaging-app-green -o jsonpath="{.items[*].metadata.name}")
+for pod in $GREEN_PODS; do
+    echo "Logs for pod $pod:"
+    kubectl logs $pod
+done
+
+echo "Blue-Green deployment completed ✅"
+
