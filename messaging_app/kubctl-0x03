@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# -------------------------------
+# Script: kubctl-0x03
+# Purpose: Apply rolling update, monitor progress, test app
+# -------------------------------
+
+set -e
+
+NAMESPACE=default
+DEPLOYMENT=messaging-app-deployment
+BLUE_DEPLOYMENT=blue_deployment.yaml
+SERVICE=messaging-app-service
+PORT=8000
+
+# 1️⃣ Apply the updated deployment (triggers rolling update)
+echo "Applying rolling update with $BLUE_DEPLOYMENT..."
+kubectl apply -f $BLUE_DEPLOYMENT -n $NAMESPACE
+
+# 2️⃣ Monitor rollout status
+echo "Monitoring rolling update progress..."
+kubectl rollout status deployment/$DEPLOYMENT -n $NAMESPACE
+
+# 3️⃣ Test app for downtime using curl
+echo "Testing app for downtime..."
+for i in {1..10}; do
+    curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:$PORT/ || echo "Request failed"
+    sleep 1
+done
+
+# 4️⃣ Check current pods
+echo "Current pods after update:"
+kubectl get pods -n $NAMESPACE
+
+echo "Rolling update script completed ✅"
+
