@@ -2,7 +2,6 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Conversation, Message
 
-
 class UserSerializer(serializers.ModelSerializer):
     username = serializers.CharField()  # Explicitly included for checker
     email = serializers.CharField()
