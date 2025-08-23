@@ -8,11 +8,17 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
-            steps {
-                sh 'python3 -m pip install -r messaging_app/requirements.txt'
-            }
-        }
+       stage('Install Dependencies') {
+    steps {
+        sh '''
+            python3 -m venv venv
+            source venv/bin/activate
+            pip install --upgrade pip
+            pip install -r messaging_app/requirements.txt
+        '''
+    }
+}
+
 
         stage('Run Tests') {
             steps {
