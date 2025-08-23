@@ -8,17 +8,19 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/benareyo/alx-backend-python.git'
+                git branch: 'main',
+                    url: 'https://github.com/benareyo/alx-backend-python.git',
+                    credentialsId: 'benareyo'
             }
         }
 
-        stage('Setup Python Environment') {
+        stage('Setup Python Env') {
             steps {
                 sh '''
                     python3 -m venv $VENV_DIR
-                    source $VENV_DIR/bin/activate
-                    pip install --upgrade pip
-                    pip install -r messaging_app/requirements.txt
+                    . $VENV_DIR/bin/activate
+                    pip3 install --upgrade pip
+                    pip3 install -r messaging_app/requirements.txt
                 '''
             }
         }
@@ -26,8 +28,8 @@ pipeline {
         stage('Run Tests') {
             steps {
                 sh '''
-                    source $VENV_DIR/bin/activate
-                    pytest messaging_app/ --junitxml=report.xml
+                    . $VENV_DIR/bin/activate
+                    pytest messaging_app/tests --junitxml=report.xml
                 '''
             }
         }
@@ -39,4 +41,3 @@ pipeline {
         }
     }
 }
-
