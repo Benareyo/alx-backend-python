@@ -8,7 +8,9 @@ pipeline {
     stages {
         stage('Checkout SCM') {
             steps {
-                git branch: 'main', url: 'https://github.com/benareyo/alx-backend-python.git'
+                git branch: 'main',
+                    url: 'https://github.com/benareyo/alx-backend-python.git',
+                    credentialsId: 'benareyo'
             }
         }
 
@@ -40,4 +42,3 @@ pipeline {
         }
     }
 }
-
