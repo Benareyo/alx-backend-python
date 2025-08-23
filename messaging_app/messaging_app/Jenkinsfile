@@ -10,7 +10,7 @@ pipeline {
             steps {
                 git branch: 'main',
                     url: 'https://github.com/benareyo/alx-backend-python.git',
-                    credentialsId: 'github-benareyo'  // Use the ID of your Jenkins GitHub credential
+                    credentialsId: 'github-benareyo' 
             }
         }
 
