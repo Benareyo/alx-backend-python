@@ -6,18 +6,9 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
+        stage('Checkout SCM') {
             steps {
                 git branch: 'main', url: 'https://github.com/benareyo/alx-backend-python.git'
-            }
-        }
-
-        stage('Install System Packages') {
-            steps {
-                sh '''
-                    sudo apt update
-                    sudo apt install -y python3-dev default-libmysqlclient-dev build-essential pkg-config
-                '''
             }
         }
 
@@ -25,7 +16,7 @@ pipeline {
             steps {
                 sh '''
                     python3 -m venv $VENV_DIR
-                    source $VENV_DIR/bin/activate
+                    . $VENV_DIR/bin/activate
                     pip install --upgrade pip
                     pip install -r messaging_app/requirements.txt
                     pip install pytest
@@ -36,7 +27,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 sh '''
-                    source $VENV_DIR/bin/activate
+                    . $VENV_DIR/bin/activate
                     pytest messaging_app/ --junitxml=report.xml
                 '''
             }
