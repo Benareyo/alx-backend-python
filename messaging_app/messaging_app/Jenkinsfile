@@ -16,14 +16,8 @@ pipeline {
             steps {
                 sh '''
                     python3 -m venv $VENV_DIR
-<<<<<<< HEAD
-                    source $VENV_DIR/bin/activate
-                    pip install --upgrade pip
-                    pip install -r messaging_app/requirements.txt
-=======
                     $VENV_DIR/bin/pip install --upgrade pip
                     $VENV_DIR/bin/pip install -r messaging_app/requirements.txt
->>>>>>> 4d4b510 (Fix Jenkinsfile to use virtual environment properly)
                 '''
             }
         }
@@ -31,12 +25,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 sh '''
-<<<<<<< HEAD
-                    source $VENV_DIR/bin/activate
-                    pytest messaging_app/ --junitxml=report.xml
-=======
-                    $VENV_DIR/bin/python -m pytest messaging_app/ --junitxml=report.xml
->>>>>>> 4d4b510 (Fix Jenkinsfile to use virtual environment properly)
+                    $VENV_DIR/bin/pytest messaging_app/ --junitxml=report.xml
                 '''
             }
         }
