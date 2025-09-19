@@ -6,7 +6,7 @@ def connect_db():
         conn = mysql.connector.connect(
             host='localhost',
             user='root',
-            password=''  # Put your MySQL root password here if you have one
+            password='' 
         )
         return conn
     except mysql.connector.Error as err:
@@ -62,3 +62,4 @@ def stream_rows(connection):
         yield row          # "yield" returns one row at a time
         row = cursor.fetchone()  # get next row
     cursor.close()
+
